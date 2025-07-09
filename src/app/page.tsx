@@ -1,103 +1,178 @@
-import Image from "next/image";
+"use client";
+import { useState } from "react";
+import { exerciciosPorDia, DiaTreino } from "./data/exercicios";
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const dias = [
+    "domingo",
+    "segunda",
+    "terca",
+    "quarta",
+    "quinta",
+    "sexta",
+    "sabado",
+  ] as const;
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+  const hoje = dias[new Date().getDay()];
+  const [index, setIndex] = useState(0);
+  const [skippedExercises, setSkippedExercises] = useState<number[]>([]);
+  const [showSkipped, setShowSkipped] = useState(false);
+
+  function isDiaTreino(dia: string): dia is DiaTreino {
+    return dia in exerciciosPorDia;
+  }
+
+  const exercicios = isDiaTreino(hoje) ? exerciciosPorDia[hoje] : [];
+  const totalDuracao = exercicios.reduce(
+    (sum, ex) => sum + (ex.duracao || 0),
+    0
+  );
+
+  function proximoExercicio() {
+    if (index < exercicios.length - 1) {
+      setIndex(index + 1);
+    } else {
+      setShowSkipped(skippedExercises.length > 0);
+    }
+  }
+
+  function pularExercicio() {
+    if (!skippedExercises.includes(index)) {
+      setSkippedExercises([...skippedExercises, index]);
+    }
+    if (index < exercicios.length - 1) {
+      setIndex(index + 1);
+    } else {
+      setShowSkipped(skippedExercises.length > 0);
+    }
+  }
+
+  function voltarParaExercicioPulado(exercicioIndex: number) {
+    setIndex(exercicioIndex);
+    setSkippedExercises(skippedExercises.filter((i) => i !== exercicioIndex));
+    setShowSkipped(false);
+  }
+
+  function resetarTreino() {
+    setIndex(0);
+    setSkippedExercises([]);
+    setShowSkipped(false);
+  }
+
+  return (
+    <html lang="pt-BR">
+      <head>
+        <meta charSet="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Treino da Namorada</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+      </head>
+      <body className="bg-gradient-to-b from-pink-50 to-white min-h-screen flex items-center justify-center font-sans">
+        <main className="max-w-md w-full mx-auto p-6 bg-white rounded-2xl shadow-lg text-center transition-all duration-300">
+          <h1 className="text-2xl font-bold text-pink-600 mb-4">
+            Treino de {hoje.charAt(0).toUpperCase() + hoje.slice(1)}
+          </h1>
+          {exercicios.length > 0 && (
+            <p className="text-gray-600 mb-4">
+              Tempo estimado: {totalDuracao} minutos
+            </p>
+          )}
+
+          {exercicios.length === 0 ? (
+            <p className="text-gray-600 text-lg">
+              Não há exercícios para hoje. Descanse! 😊
+            </p>
+          ) : showSkipped && skippedExercises.length > 0 ? (
+            <div className="animate-fade-in">
+              <p className="text-xl font-semibold text-pink-500 mb-4">
+                Você terminou ou pulou todos os exercícios!
+              </p>
+              <p className="text-gray-600 mb-4">
+                Exercícios pulados: {skippedExercises.length}
+              </p>
+              <div className="space-y-2">
+                {skippedExercises.map((i) => (
+                  <button
+                    key={i}
+                    onClick={() => voltarParaExercicioPulado(i)}
+                    className="block w-full bg-gray-100 text-gray-900 font-semibold py-2 px-4 rounded-lg hover:bg-gray-200 transition-colors duration-200"
+                  >
+                    Voltar para: {exercicios[i].nome}
+                  </button>
+                ))}
+              </div>
+            </div>
+          ) : showSkipped && skippedExercises.length === 0 ? (
+            <div className="animate-fade-in bg-pink-100 rounded-lg p-6">
+              <p className="text-2xl font-bold text-pink-600 mb-4">
+                Parabéns, você concluiu todo o treino de hoje! 🎉
+              </p>
+              <p className="text-gray-600 mb-4">
+                Você arrasou! Volte amanhã para mais! 💪
+              </p>
+              <p className="text-gray-600 mb-4">
+                Tempo total do treino: {totalDuracao} minutos
+              </p>
+              <button
+                onClick={resetarTreino}
+                className="bg-pink-500 text-white font-semibold py-2 px-6 rounded-full hover:bg-pink-600 transition-colors duration-200"
+              >
+                Ver treino novamente
+              </button>
+            </div>
+          ) : (
+            <div className="animate-fade-in">
+              <h2 className="text-xl font-semibold text-gray-800 mb-2">
+                {exercicios[index].nome}
+              </h2>
+              <p className="text-gray-600 mb-2">
+                <strong>Músculo trabalhado:</strong> {exercicios[index].musculo}
+              </p>
+              <p className="text-gray-600 mb-2">
+                <strong>Tempo estimado:</strong> {exercicios[index].duracao}{" "}
+                minutos
+              </p>
+              <p className="text-gray-600 mb-4">
+                {exercicios[index].descricao}
+              </p>
+              <img
+                src={exercicios[index].gif}
+                alt={exercicios[index].nome}
+                className="w-full max-w-xs mx-auto rounded-lg mb-6 shadow-md"
+              />
+              <div className="flex justify-center gap-4">
+                <button
+                  onClick={proximoExercicio}
+                  className="bg-pink-500 text-white font-semibold py-2 px-6 rounded-full hover:bg-pink-600 transition-colors duration-200"
+                >
+                  concluído
+                </button>
+                <button
+                  onClick={pularExercicio}
+                  className="bg-gray-300 text-gray-800 font-semibold py-2 px-6 rounded-full hover:bg-gray-400 transition-colors duration-200"
+                >
+                  Pular
+                </button>
+              </div>
+            </div>
+          )}
+        </main>
+        <style jsx global>{`
+          @keyframes fade-in {
+            from {
+              opacity: 0;
+              transform: translateY(10px);
+            }
+            to {
+              opacity: 1;
+              transform: translateY(0);
+            }
+          }
+          .animate-fade-in {
+            animation: fade-in 0.3s ease-out;
+          }
+        `}</style>
+      </body>
+    </html>
   );
 }
