@@ -23,10 +23,6 @@ export default function Home() {
   }
 
   const exercicios = isDiaTreino(hoje) ? exerciciosPorDia[hoje] : [];
-  const totalDuracao = exercicios.reduce(
-    (sum, ex) => sum + (ex.duracao || 0),
-    0
-  );
 
   function proximoExercicio() {
     if (index < exercicios.length - 1) {
@@ -72,11 +68,6 @@ export default function Home() {
           <h1 className="text-2xl font-bold text-pink-600 mb-4">
             Treino de {hoje.charAt(0).toUpperCase() + hoje.slice(1)}
           </h1>
-          {exercicios.length > 0 && (
-            <p className="text-gray-600 mb-4">
-              Tempo estimado: {totalDuracao} minutos
-            </p>
-          )}
 
           {exercicios.length === 0 ? (
             <p className="text-gray-600 text-lg">
@@ -110,9 +101,6 @@ export default function Home() {
               <p className="text-gray-600 mb-4">
                 Você arrasou! Volte amanhã para mais! 💪
               </p>
-              <p className="text-gray-600 mb-4">
-                Tempo total do treino: {totalDuracao} minutos
-              </p>
               <button
                 onClick={resetarTreino}
                 className="bg-pink-500 text-white font-semibold py-2 px-6 rounded-full hover:bg-pink-600 transition-colors duration-200"
@@ -129,8 +117,7 @@ export default function Home() {
                 <strong>Músculo trabalhado:</strong> {exercicios[index].musculo}
               </p>
               <p className="text-gray-600 mb-2">
-                <strong>Tempo estimado:</strong> {exercicios[index].duracao}{" "}
-                minutos
+                <strong>Quantidade:</strong> {exercicios[index].quantidade}
               </p>
               <p className="text-gray-600 mb-4">
                 {exercicios[index].descricao}
@@ -145,7 +132,7 @@ export default function Home() {
                   onClick={proximoExercicio}
                   className="bg-pink-500 text-white font-semibold py-2 px-6 rounded-full hover:bg-pink-600 transition-colors duration-200"
                 >
-                  concluído
+                  Concluído
                 </button>
                 <button
                   onClick={pularExercicio}
